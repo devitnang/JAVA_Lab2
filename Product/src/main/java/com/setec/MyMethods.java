@@ -1,5 +1,6 @@
 package com.setec;
 
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Scanner;
@@ -14,7 +15,7 @@ public class MyMethods {
         System.out.println("3. Delete Product by ID");
         System.out.println("4. Show All Products");
         System.out.println("5. Exit");
-        printLine(' ', 60);
+        printLine('-', 60);
         return inputInt("Choose (1-5): ", 1, 5);
     }
 
@@ -23,7 +24,14 @@ public class MyMethods {
         while (true) {
             try {
                 System.out.print(message);
-                value = Integer.parseInt(cin.nextLine().trim());
+                String raw = cin.nextLine().trim();
+                //reject "-0" explicitly
+                if (raw.equals("-0")) {
+                    System.out.println("Invalid input! Please enter a whole number.");
+                    continue;
+                }
+
+                value = Integer.parseInt(raw);
                 if (value < min || value > max) {
                     System.out.println("Value must be between " + min + " and " + max + ".");
                 } else {
@@ -54,10 +62,12 @@ public class MyMethods {
 
     public static void addProduct(List<Product> products) {
         int n = inputInt("How many products to add? ", 1, 100);
+
+        List<Integer> batchIds = new ArrayList<>();
+
         for (int i = 0; i < n; i++) {
             System.out.println("\nProduct № " + (i + 1));
-
-            // BUG FIX: Validate unique ID
+            
             int id;
             while (true) {
                 id = inputInt("Enter ID (1-999): ", 1, 999);
@@ -68,14 +78,17 @@ public class MyMethods {
                         break;
                     }
                 }
+                if (!duplicate && batchIds.contains(id)) {
+                    duplicate = true;
+                }
                 if (duplicate) {
                     System.out.println("ID " + id + " already exists! Please enter a different ID.");
                 } else {
+                    batchIds.add(id);
                     break;
                 }
             }
-
-            // BUG FIX: Validate non-empty name
+            // Validate non-empty name
             String name;
             do {
                 System.out.print("Enter Name: ");
@@ -95,10 +108,11 @@ public class MyMethods {
             System.out.println("No products to edit!");
             return;
         }
-        int id = inputInt("Enter ID to edit: ", 1, 999);
+
+        int id = inputInt("Enter ID to edit: ", 1, Integer.MAX_VALUE / 2);
         for (Product p : products) {
             if (p.getId() == id) {
-                // BUG FIX: Validate non-empty name
+                // Validate non-empty name
                 String name;
                 do {
                     System.out.print("New Name: ");
@@ -120,7 +134,8 @@ public class MyMethods {
             System.out.println("No products to delete!");
             return;
         }
-        int id = inputInt("Enter ID to delete: ", 1, 999);
+
+        int id = inputInt("Enter ID to delete: ", 1, Integer.MAX_VALUE / 2);
         Iterator<Product> iterator = products.iterator();
         while (iterator.hasNext()) {
             Product p = iterator.next();
@@ -133,27 +148,27 @@ public class MyMethods {
         System.out.println("Product ID " + id + " not found!");
     }
 
+    //blank line
     public static void printLine(char ch, int length) {
-    		System.out.println(String.valueOf(ch).repeat(length));
-    	
+        System.out.println(String.valueOf(ch).repeat(length));
     }
-    
+
     public static void showAllProducts(List<Product> products) {
         if (products.isEmpty()) {
             System.out.println("No products found!");
             return;
         }
-        
+
         System.out.println();
-        printLine('-',60);
+        printLine('-', 60);
         System.out.printf("%-5s %-20s %-12s %-8s %-12s%n",
                 "ID", "NAME", "PRICE ($)", "QTY", "AMOUNT ($)");
-        printLine('-',60);
+        printLine('-', 60);
 
         for (Product p : products) {
-            System.out.println(p); // automatically calls toString()
+            System.out.println(p); //calls toString()
         }
 
-        printLine('-',60);
+        printLine('-', 60);
     }
 }
